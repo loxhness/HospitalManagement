@@ -1,0 +1,50 @@
+HOSPITAL STAFF & TASK MANAGEMENT SYSTEM PROPOSAL
+
+PROJECT OVERVIEW
+Our Hospital Staff & Task Management System will help hospitals manage their staff (doctors, nurses, admins), patient tasks (check-ups, lab tests, surgeries), and shifts. The system will track patient-specific tasks and generate reports on workload by department or doctor.
+
+GROUP MEMBERS
+- Ebaad Zaidi
+- Uzair Suboor
+- Michael James 
+- Ehsan Riazi
+
+TECHNICAL STACK
+- ASP.NET Core MVC & Web API
+- SQL Server
+- Bootstrap for frontend
+- ASP.NET Identity for authentication
+
+CORE FEATURES
+
+1. User Authentication
+- Three main roles: Doctor, Nurse, and Admin
+- Login/logout functionality
+- Role-based access
+
+2. Staff Management
+- Add, edit, view, and delete staff profiles
+- Assign staff to departments
+- Track qualifications
+
+3. Patient-Task Management
+- Create tasks linked to specific patients
+- Set priorities and due dates
+- Assign tasks to staff
+- Track completion status
+
+4. Shift Management
+- Create and assign shifts
+- Schedule staff for projects
+- Avoid scheduling conflicts
+
+5. Reporting
+- Show workload by department
+- Track doctor performance
+- Generate basic reports
+
+6. API
+- Create REST API for core functions
+- Secure API with authentication
+
+
