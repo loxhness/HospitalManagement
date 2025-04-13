@@ -1,0 +1,69 @@
+﻿@model System.Data.DataTable
+@{
+    ViewBag.Title = "Department Performance";
+}
+
+<h2>Department Performance Report</h2>
+
+<div class="row">
+    <div class="col-md-12">
+        <a href="@Url.Action("Index")" class="btn btn-default">Back to Reports</a>
+        <button onclick="window.print()" class="btn btn-primary pull-right">Print Report</button>
+    </div>
+</div>
+
+<div class="row" style="margin-top: 20px;">
+    <div class="col-md-12">
+        <table class="table table-striped table-bordered">
+            <thead>
+                <tr>
+                    @foreach (System.Data.DataColumn col in Model.Columns)
+                    {
+                        <th>@col.ColumnName</th>
+                    }
+                    <th>Completion Rate</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (System.Data.DataRow row in Model.Rows)
+                {
+                    int totalTasks = Convert.ToInt32(row["TotalTasks"]);
+                    int completedTasks = Convert.ToInt32(row["CompletedTasks"]);
+                    double completionRate = totalTasks > 0 ? (double)completedTasks / totalTasks * 100 : 0;
+
+                    <tr>
+                        @foreach (var item in row.ItemArray)
+                        {
+                            <td>@item</td>
+                        }
+                        <td>@Math.Round(completionRate, 1)%</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="row" style="margin-top: 30px;">
+    <div class="col-md-12">
+        <h3>Department Summary</h3>
+        <p>Total Departments: @Model.Rows.Count</p>
+        @{
+            int totalStaff = 0;
+            int totalAllTasks = 0;
+            int totalAllCompleted = 0;
+
+            foreach (System.Data.DataRow row in Model.Rows)
+            {
+                totalStaff += Convert.ToInt32(row["StaffCount"]);
+                totalAllTasks += Convert.ToInt32(row["TotalTasks"]);
+                totalAllCompleted += Convert.ToInt32(row["CompletedTasks"]);
+            }
+
+            double overallCompletionRate = totalAllTasks > 0 ? (double)totalAllCompleted / totalAllTasks * 100 : 0;
+        }
+        <p>Total Staff: @totalStaff</p>
+        <p>Total Tasks: @totalAllTasks</p>
+        <p>Overall Completion Rate: @Math.Round(overallCompletionRate, 1)%</p>
+    </div>
+</div>
