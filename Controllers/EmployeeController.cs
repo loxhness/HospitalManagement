@@ -1,37 +1,87 @@
-﻿using HospitalManagement.Data;
+﻿using System;
+using System.Collections.Generic;
+using System.Data;
+using Microsoft.Data.SqlClient; // Changed from System.Data.SqlClient
 using HospitalManagement.Models;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using System.Linq;
-using System.Threading.Tasks;
+using Microsoft.Extensions.Configuration;
 
 namespace HospitalManagement.Controllers
 {
     public class EmployeeController : Controller
     {
-        private readonly HospitalDB _context;
+        private readonly string _connectionString;
 
-        public EmployeeController(HospitalDB context)
+        public EmployeeController(IConfiguration configuration)
         {
-            _context = context;
+            _connectionString = configuration.GetConnectionString("HospitalDB");
         }
 
         // GET: Employee
-        public async Task<IActionResult> Index()
+        public IActionResult Index()
         {
-            return View(await _context.Employees.ToListAsync());
+            List<Employee> employees = new List<Employee>();
+
+            using (SqlConnection conn = new SqlConnection(_connectionString))
+            {
+                using (SqlCommand cmd = new SqlCommand("SELECT * FROM Employees", conn))
+                {
+                    conn.Open();
+                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            employees.Add(new Employee
+                            {
+                                Id = Convert.ToInt32(reader["Id"]),
+                                FirstName = reader["FirstName"].ToString(),
+                                LastName = reader["LastName"].ToString(),
+                                Email = reader["Email"].ToString(),
+                                Role = reader["Role"].ToString(),
+                                Department = reader["Department"].ToString()
+                            });
+                        }
+                    }
+                }
+            }
+
+            return View(employees);
         }
 
         // GET: Employee/Details/5
-        public async Task<IActionResult> Details(int? id)
+        public IActionResult Details(int? id)
         {
             if (id == null)
             {
                 return NotFound();
             }
 
-            var employee = await _context.Employees
-                .FirstOrDefaultAsync(m => m.Id == id);
+            Employee employee = null;
+
+            using (SqlConnection conn = new SqlConnection(_connectionString))
+            {
+                using (SqlCommand cmd = new SqlCommand("SELECT * FROM Employees WHERE Id = @Id", conn))
+                {
+                    cmd.Parameters.AddWithValue("@Id", id);
+                    conn.Open();
+                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        if (reader.Read())
+                        {
+                            employee = new Employee
+                            {
+                                Id = Convert.ToInt32(reader["Id"]),
+                                FirstName = reader["FirstName"].ToString(),
+                                LastName = reader["LastName"].ToString(),
+                                Email = reader["Email"].ToString(),
+                                Role = reader["Role"].ToString(),
+                                Department = reader["Department"].ToString()
+                            };
+                        }
+                    }
+                }
+            }
+
             if (employee == null)
             {
                 return NotFound();
@@ -49,37 +99,77 @@ namespace HospitalManagement.Controllers
         // POST: Employee/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(Employee employee)
+        public IActionResult Create(Employee employee)
         {
             if (ModelState.IsValid)
             {
-                _context.Add(employee);
-                await _context.SaveChangesAsync();
+                using (SqlConnection conn = new SqlConnection(_connectionString))
+                {
+                    using (SqlCommand cmd = new SqlCommand("INSERT INTO Employees (FirstName, LastName, Email, Role, Department) VALUES (@FirstName, @LastName, @Email, @Role, @Department); SELECT SCOPE_IDENTITY();", conn))
+                    {
+                        cmd.Parameters.AddWithValue("@FirstName", employee.FirstName);
+                        cmd.Parameters.AddWithValue("@LastName", employee.LastName);
+                        cmd.Parameters.AddWithValue("@Email", employee.Email);
+                        cmd.Parameters.AddWithValue("@Role", employee.Role);
+                        cmd.Parameters.AddWithValue("@Department", employee.Department ?? (object)DBNull.Value);
+
+                        conn.Open();
+                        employee.Id = Convert.ToInt32(cmd.ExecuteScalar());
+                    }
+                }
+
                 return RedirectToAction(nameof(Index));
             }
+
             return View(employee);
         }
 
         // GET: Employee/Edit/5
-        public async Task<IActionResult> Edit(int? id)
+        public IActionResult Edit(int? id)
         {
             if (id == null)
             {
                 return NotFound();
             }
 
-            var employee = await _context.Employees.FindAsync(id);
+            Employee employee = null;
+
+            using (SqlConnection conn = new SqlConnection(_connectionString))
+            {
+                using (SqlCommand cmd = new SqlCommand("SELECT * FROM Employees WHERE Id = @Id", conn))
+                {
+                    cmd.Parameters.AddWithValue("@Id", id);
+                    conn.Open();
+                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        if (reader.Read())
+                        {
+                            employee = new Employee
+                            {
+                                Id = Convert.ToInt32(reader["Id"]),
+                                FirstName = reader["FirstName"].ToString(),
+                                LastName = reader["LastName"].ToString(),
+                                Email = reader["Email"].ToString(),
+                                Role = reader["Role"].ToString(),
+                                Department = reader["Department"].ToString()
+                            };
+                        }
+                    }
+                }
+            }
+
             if (employee == null)
             {
                 return NotFound();
             }
+
             return View(employee);
         }
 
         // POST: Employee/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, Employee employee)
+        public IActionResult Edit(int id, Employee employee)
         {
             if (id != employee.Id)
             {
@@ -88,37 +178,67 @@ namespace HospitalManagement.Controllers
 
             if (ModelState.IsValid)
             {
-                try
+                using (SqlConnection conn = new SqlConnection(_connectionString))
                 {
-                    _context.Update(employee);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!_context.Employees.Any(e => e.Id == employee.Id))
+                    using (SqlCommand cmd = new SqlCommand("UPDATE Employees SET FirstName = @FirstName, LastName = @LastName, Email = @Email, Role = @Role, Department = @Department WHERE Id = @Id", conn))
                     {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
+                        cmd.Parameters.AddWithValue("@Id", employee.Id);
+                        cmd.Parameters.AddWithValue("@FirstName", employee.FirstName);
+                        cmd.Parameters.AddWithValue("@LastName", employee.LastName);
+                        cmd.Parameters.AddWithValue("@Email", employee.Email);
+                        cmd.Parameters.AddWithValue("@Role", employee.Role);
+                        cmd.Parameters.AddWithValue("@Department", employee.Department ?? (object)DBNull.Value);
+
+                        conn.Open();
+                        int rowsAffected = cmd.ExecuteNonQuery();
+
+                        if (rowsAffected == 0)
+                        {
+                            return NotFound();
+                        }
                     }
                 }
+
                 return RedirectToAction(nameof(Index));
             }
+
             return View(employee);
         }
 
         // GET: Employee/Delete/5
-        public async Task<IActionResult> Delete(int? id)
+        public IActionResult Delete(int? id)
         {
             if (id == null)
             {
                 return NotFound();
             }
 
-            var employee = await _context.Employees
-                .FirstOrDefaultAsync(m => m.Id == id);
+            Employee employee = null;
+
+            using (SqlConnection conn = new SqlConnection(_connectionString))
+            {
+                using (SqlCommand cmd = new SqlCommand("SELECT * FROM Employees WHERE Id = @Id", conn))
+                {
+                    cmd.Parameters.AddWithValue("@Id", id);
+                    conn.Open();
+                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        if (reader.Read())
+                        {
+                            employee = new Employee
+                            {
+                                Id = Convert.ToInt32(reader["Id"]),
+                                FirstName = reader["FirstName"].ToString(),
+                                LastName = reader["LastName"].ToString(),
+                                Email = reader["Email"].ToString(),
+                                Role = reader["Role"].ToString(),
+                                Department = reader["Department"].ToString()
+                            };
+                        }
+                    }
+                }
+            }
+
             if (employee == null)
             {
                 return NotFound();
@@ -130,11 +250,18 @@ namespace HospitalManagement.Controllers
         // POST: Employee/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+        public IActionResult DeleteConfirmed(int id)
         {
-            var employee = await _context.Employees.FindAsync(id);
-            _context.Employees.Remove(employee);
-            await _context.SaveChangesAsync();
+            using (SqlConnection conn = new SqlConnection(_connectionString))
+            {
+                using (SqlCommand cmd = new SqlCommand("DELETE FROM Employees WHERE Id = @Id", conn))
+                {
+                    cmd.Parameters.AddWithValue("@Id", id);
+                    conn.Open();
+                    cmd.ExecuteNonQuery();
+                }
+            }
+
             return RedirectToAction(nameof(Index));
         }
     }

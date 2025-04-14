@@ -1,3 +1,5 @@
+using HospitalManagement.Data;
+
 namespace HospitalManagement
 {
     public class Program
@@ -9,6 +11,8 @@ namespace HospitalManagement
             // Add services to the container.
             builder.Services.AddControllersWithViews();
 
+            // Register DatabaseHelper
+            builder.Services.AddScoped<DatabaseHelper>();
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
