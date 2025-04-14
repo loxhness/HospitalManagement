@@ -1,0 +1,37 @@
+﻿@model IEnumerable<HospitalManagement.Models.TaskItem>
+@{
+    ViewData["Title"] = "Task List";
+}
+<h2>Task List</h2>
+<p>
+    <a asp-action="Create" class="btn btn-primary">Create New Task</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>@Html.DisplayNameFor(model => model.First().Title)</th>
+            <th>@Html.DisplayNameFor(model => model.First().Priority)</th>
+            <th>@Html.DisplayNameFor(model => model.First().Status)</th>
+            <th>@Html.DisplayNameFor(model => model.First().DueDate)</th>
+            <th>@Html.DisplayNameFor(model => model.First().AssignedEmployee.FirstName)</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var task in Model)
+        {
+            <tr>
+                <td>@task.Title</td>
+                <td>@task.Priority</td>
+                <td>@task.Status</td>
+                <td>@task.DueDate.ToShortDateString()</td>
+                <td>@(task.AssignedEmployee != null ? task.AssignedEmployee.FirstName : "Unassigned")</td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@task.Id">Edit</a> |
+                    <a asp-action="Details" asp-route-id="@task.Id">Details</a> |
+                    <a asp-action="Delete" asp-route-id="@task.Id">Delete</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
