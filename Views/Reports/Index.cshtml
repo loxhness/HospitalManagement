@@ -1,29 +1,45 @@
 ﻿@{
-    ViewBag.Title = "Hospital Reports";
+    ViewData["Title"] = "Reports";
 }
 
-<h2>Hospital Management Reports</h2>
+<h1 class="mb-4">Hospital Management Reports</h1>
 
 <div class="row">
-    <div class="col-md-6">
-        <div class="panel panel-default">
-            <div class="panel-heading">
-                <h3 class="panel-title">Staff Workload Report</h3>
+    <div class="col-md-6 mb-4">
+        <div class="card shadow-sm h-100">
+            <div class="card-header bg-primary text-white">
+                <h5 class="card-title m-0">Staff Workload Report</h5>
             </div>
-            <div class="panel-body">
-                <p>View task distribution across staff members</p>
-                <a href="@Url.Action("StaffWorkload")" class="btn btn-primary">View Report</a>
+            <div class="card-body">
+                <p class="card-text">View task distribution and workload across staff members.</p>
+                <a asp-action="StaffWorkload" class="btn btn-outline-primary">Generate Report</a>
             </div>
         </div>
     </div>
-    <div class="col-md-6">
-        <div class="panel panel-default">
-            <div class="panel-heading">
-                <h3 class="panel-title">Department Performance</h3>
+
+    <div class="col-md-6 mb-4">
+        <div class="card shadow-sm h-100">
+            <div class="card-header bg-primary text-white">
+                <h5 class="card-title m-0">Department Performance</h5>
             </div>
-            <div class="panel-body">
-                <p>View performance metrics by department</p>
-                <a href="@Url.Action("DepartmentPerformance")" class="btn btn-primary">View Report</a>
+            <div class="card-body">
+                <p class="card-text">Compare workload and task completion rates across departments.</p>
+                <a asp-action="DepartmentPerformance" class="btn btn-outline-primary">Generate Report</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6 mb-4">
+        <div class="card shadow-sm h-100">
+            <div class="card-header bg-primary text-white">
+                <h5 class="card-title m-0">Patient Tasks Report</h5>
+            </div>
+            <div class="card-body">
+                <p class="card-text">View all tasks related to a specific patient.</p>
+                <form asp-action="PatientTasks" method="get" class="d-flex mt-3">
+                    <input type="number" name="id" class="form-control me-2" placeholder="Patient ID" required />
+                    <button type="submit" class="btn btn-outline-primary">Go</button>
+                </form>
             </div>
         </div>
     </div>

@@ -1,8 +1,36 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Home";
 }
 
 <div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+    <h1 class="display-4 mb-4">Hospital Staff & Task Management System</h1>
+    <div class="row mt-5">
+        <div class="col-md-4">
+            <div class="card shadow-sm mb-4">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Staff Management</h5>
+                    <p class="card-text">Manage doctors, nurses, and administrative staff</p>
+                    <a asp-controller="Employee" asp-action="Index" class="btn btn-primary">View Staff</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card shadow-sm mb-4">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Task Management</h5>
+                    <p class="card-text">Manage patient-specific tasks and assignments</p>
+                    <a asp-controller="TaskItem" asp-action="Index" class="btn btn-primary">View Tasks</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card shadow-sm mb-4">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Reports</h5>
+                    <p class="card-text">Generate workload and performance reports</p>
+                    <a asp-controller="Reports" asp-action="Index" class="btn btn-primary">View Reports</a>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
