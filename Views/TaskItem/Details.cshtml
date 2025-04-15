@@ -1,0 +1,85 @@
+﻿@model TaskItem
+
+<div class="container">
+    <h2>Task Details</h2>
+
+    <div class="card">
+        <div class="card-header">
+            <h3>@Model.Title</h3>
+        </div>
+        <div class="card-body">
+            <dl class="row">
+                <dt class="col-sm-3">Description</dt>
+                <dd class="col-sm-9">
+                    @(string.IsNullOrEmpty(Model.Description) ? "No description provided" : Model.Description)
+                </dd>
+
+                <dt class="col-sm-3">Priority</dt>
+                <dd class="col-sm-9">
+                    <span class="badge @GetPriorityBadgeClass(Model.Priority)">@Model.Priority</span>
+                </dd>
+
+                <dt class="col-sm-3">Status</dt>
+                <dd class="col-sm-9">
+                    <span class="badge @GetStatusBadgeClass(Model.Status)">@Model.Status</span>
+                </dd>
+
+                <dt class="col-sm-3">Due Date</dt>
+                <dd class="col-sm-9">
+                    @Model.DueDate.ToString("dddd, MMMM dd, yyyy")
+                    @{
+                        var daysLeft = (Model.DueDate - DateTime.Today).Days;
+                    }
+                    <span class="text-@(daysLeft < 0 ? "danger" : (daysLeft <= 3 ? "warning" : "muted"))">
+                        (@(daysLeft < 0 ? "Overdue" : $"{daysLeft} days left"))
+                    </span>
+                </dd>
+
+                @if (Model.AssignedEmployee != null)
+                {
+                    <dt class="col-sm-3">Assigned To</dt>
+                    <dd class="col-sm-9">
+                        @Model.AssignedEmployee.FirstName @Model.AssignedEmployee.LastName
+                        <small class="text-muted">(@Model.AssignedEmployee.Department - @Model.AssignedEmployee.Role)</small>
+                    </dd>
+                }
+                else
+                {
+                    <dt class="col-sm-3">Assigned To</dt>
+                    <dd class="col-sm-9">Unassigned</dd>
+                }
+            </dl>
+        </div>
+        <div class="card-footer">
+            <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">Edit Task</a>
+            <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+            <a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-danger float-right">Delete Task</a>
+        </div>
+    </div>
+</div>
+
+@functions {
+    private string GetPriorityBadgeClass(string priority)
+    {
+        return priority switch
+        {
+            "Low" => "badge-success",
+            "Medium" => "badge-info",
+            "High" => "badge-warning",
+            "Critical" => "badge-danger",
+            _ => "badge-secondary"
+        };
+    }
+
+    private string GetStatusBadgeClass(string status)
+    {
+        return status switch
+        {
+            "Not Started" => "badge-secondary",
+            "In Progress" => "badge-primary",
+            "Completed" => "badge-success",
+            "On Hold" => "badge-warning",
+            _ => "badge-light"
+        };
+    }
+}

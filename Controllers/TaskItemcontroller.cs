@@ -24,9 +24,11 @@ namespace HospitalManagement.Controllers
 
             using (SqlConnection conn = new SqlConnection(_connectionString))
             {
-                string sql = @"SELECT t.*, e.Id as EmployeeId, e.FirstName, e.LastName, e.Email, e.Role, e.Department 
+                string sql = @"SELECT t.TaskId as Id, t.Title, t.Description, t.PatientId, 
+                               t.AssignedToId, t.Status, t.Priority, t.CreatedDate, t.DueDate, t.CompletedDate,
+                               e.Id as EmployeeId, e.FirstName, e.LastName, e.Email, e.Role, e.Department 
                                FROM Tasks t 
-                               LEFT JOIN Employees e ON t.AssignedEmployeeId = e.Id";
+                               LEFT JOIN Employees e ON t.AssignedToId = e.Id";
 
                 using (SqlCommand cmd = new SqlCommand(sql, conn))
                 {
@@ -45,18 +47,22 @@ namespace HospitalManagement.Controllers
                                 DueDate = Convert.ToDateTime(reader["DueDate"])
                             };
 
-                            if (reader["AssignedEmployeeId"] != DBNull.Value)
+                            if (reader["AssignedToId"] != DBNull.Value)
                             {
-                                task.AssignedEmployeeId = Convert.ToInt32(reader["AssignedEmployeeId"]);
-                                task.AssignedEmployee = new Employee
+                                task.AssignedEmployeeId = Convert.ToInt32(reader["AssignedToId"]);
+
+                                if (reader["EmployeeId"] != DBNull.Value)
                                 {
-                                    Id = Convert.ToInt32(reader["EmployeeId"]),
-                                    FirstName = reader["FirstName"].ToString(),
-                                    LastName = reader["LastName"].ToString(),
-                                    Email = reader["Email"].ToString(),
-                                    Role = reader["Role"].ToString(),
-                                    Department = reader["Department"]?.ToString()
-                                };
+                                    task.AssignedEmployee = new Employee
+                                    {
+                                        Id = Convert.ToInt32(reader["EmployeeId"]),
+                                        FirstName = reader["FirstName"].ToString(),
+                                        LastName = reader["LastName"].ToString(),
+                                        Email = reader["Email"].ToString(),
+                                        Role = reader["Role"].ToString(),
+                                        Department = reader["Department"]?.ToString()
+                                    };
+                                }
                             }
 
                             tasks.Add(task);
@@ -80,10 +86,12 @@ namespace HospitalManagement.Controllers
 
             using (SqlConnection conn = new SqlConnection(_connectionString))
             {
-                string sql = @"SELECT t.*, e.Id as EmployeeId, e.FirstName, e.LastName, e.Email, e.Role, e.Department 
+                string sql = @"SELECT t.TaskId as Id, t.Title, t.Description, t.PatientId, 
+                               t.AssignedToId, t.Status, t.Priority, t.CreatedDate, t.DueDate, t.CompletedDate,
+                               e.Id as EmployeeId, e.FirstName, e.LastName, e.Email, e.Role, e.Department 
                                FROM Tasks t 
-                               LEFT JOIN Employees e ON t.AssignedEmployeeId = e.Id
-                               WHERE t.Id = @Id";
+                               LEFT JOIN Employees e ON t.AssignedToId = e.Id
+                               WHERE t.TaskId = @Id";
 
                 using (SqlCommand cmd = new SqlCommand(sql, conn))
                 {
@@ -103,18 +111,22 @@ namespace HospitalManagement.Controllers
                                 DueDate = Convert.ToDateTime(reader["DueDate"])
                             };
 
-                            if (reader["AssignedEmployeeId"] != DBNull.Value)
+                            if (reader["AssignedToId"] != DBNull.Value)
                             {
-                                task.AssignedEmployeeId = Convert.ToInt32(reader["AssignedEmployeeId"]);
-                                task.AssignedEmployee = new Employee
+                                task.AssignedEmployeeId = Convert.ToInt32(reader["AssignedToId"]);
+
+                                if (reader["EmployeeId"] != DBNull.Value)
                                 {
-                                    Id = Convert.ToInt32(reader["EmployeeId"]),
-                                    FirstName = reader["FirstName"].ToString(),
-                                    LastName = reader["LastName"].ToString(),
-                                    Email = reader["Email"].ToString(),
-                                    Role = reader["Role"].ToString(),
-                                    Department = reader["Department"]?.ToString()
-                                };
+                                    task.AssignedEmployee = new Employee
+                                    {
+                                        Id = Convert.ToInt32(reader["EmployeeId"]),
+                                        FirstName = reader["FirstName"].ToString(),
+                                        LastName = reader["LastName"].ToString(),
+                                        Email = reader["Email"].ToString(),
+                                        Role = reader["Role"].ToString(),
+                                        Department = reader["Department"]?.ToString()
+                                    };
+                                }
                             }
                         }
                     }
@@ -173,8 +185,8 @@ namespace HospitalManagement.Controllers
             {
                 using (SqlConnection conn = new SqlConnection(_connectionString))
                 {
-                    string sql = @"INSERT INTO Tasks (Title, Description, Priority, Status, DueDate, AssignedEmployeeId) 
-                                   VALUES (@Title, @Description, @Priority, @Status, @DueDate, @AssignedEmployeeId);
+                    string sql = @"INSERT INTO Tasks (Title, Description, Priority, Status, DueDate, AssignedToId) 
+                                   VALUES (@Title, @Description, @Priority, @Status, @DueDate, @AssignedToId);
                                    SELECT SCOPE_IDENTITY();";
 
                     using (SqlCommand cmd = new SqlCommand(sql, conn))
@@ -184,7 +196,7 @@ namespace HospitalManagement.Controllers
                         cmd.Parameters.AddWithValue("@Priority", taskItem.Priority);
                         cmd.Parameters.AddWithValue("@Status", taskItem.Status);
                         cmd.Parameters.AddWithValue("@DueDate", taskItem.DueDate);
-                        cmd.Parameters.AddWithValue("@AssignedEmployeeId",
+                        cmd.Parameters.AddWithValue("@AssignedToId",
                             taskItem.AssignedEmployeeId.HasValue ? (object)taskItem.AssignedEmployeeId.Value : DBNull.Value);
 
                         conn.Open();
@@ -239,7 +251,9 @@ namespace HospitalManagement.Controllers
 
             using (SqlConnection conn = new SqlConnection(_connectionString))
             {
-                string sql = "SELECT * FROM Tasks WHERE Id = @Id";
+                string sql = @"SELECT TaskId as Id, Title, Description, PatientId, AssignedToId, 
+                               Status, Priority, CreatedDate, DueDate, CompletedDate 
+                               FROM Tasks WHERE TaskId = @Id";
 
                 using (SqlCommand cmd = new SqlCommand(sql, conn))
                 {
@@ -259,9 +273,9 @@ namespace HospitalManagement.Controllers
                                 DueDate = Convert.ToDateTime(reader["DueDate"])
                             };
 
-                            if (reader["AssignedEmployeeId"] != DBNull.Value)
+                            if (reader["AssignedToId"] != DBNull.Value)
                             {
-                                task.AssignedEmployeeId = Convert.ToInt32(reader["AssignedEmployeeId"]);
+                                task.AssignedEmployeeId = Convert.ToInt32(reader["AssignedToId"]);
                             }
                         }
                     }
@@ -325,8 +339,8 @@ namespace HospitalManagement.Controllers
                                   Priority = @Priority, 
                                   Status = @Status, 
                                   DueDate = @DueDate, 
-                                  AssignedEmployeeId = @AssignedEmployeeId 
-                                  WHERE Id = @Id";
+                                  AssignedToId = @AssignedToId 
+                                  WHERE TaskId = @Id";
 
                     using (SqlCommand cmd = new SqlCommand(sql, conn))
                     {
@@ -336,7 +350,7 @@ namespace HospitalManagement.Controllers
                         cmd.Parameters.AddWithValue("@Priority", taskItem.Priority);
                         cmd.Parameters.AddWithValue("@Status", taskItem.Status);
                         cmd.Parameters.AddWithValue("@DueDate", taskItem.DueDate);
-                        cmd.Parameters.AddWithValue("@AssignedEmployeeId",
+                        cmd.Parameters.AddWithValue("@AssignedToId",
                             taskItem.AssignedEmployeeId.HasValue ? (object)taskItem.AssignedEmployeeId.Value : DBNull.Value);
 
                         conn.Open();
@@ -397,10 +411,12 @@ namespace HospitalManagement.Controllers
 
             using (SqlConnection conn = new SqlConnection(_connectionString))
             {
-                string sql = @"SELECT t.*, e.Id as EmployeeId, e.FirstName, e.LastName, e.Email, e.Role, e.Department 
+                string sql = @"SELECT t.TaskId as Id, t.Title, t.Description, t.PatientId, 
+                               t.AssignedToId, t.Status, t.Priority, t.CreatedDate, t.DueDate, t.CompletedDate,
+                               e.Id as EmployeeId, e.FirstName, e.LastName, e.Email, e.Role, e.Department 
                                FROM Tasks t 
-                               LEFT JOIN Employees e ON t.AssignedEmployeeId = e.Id
-                               WHERE t.Id = @Id";
+                               LEFT JOIN Employees e ON t.AssignedToId = e.Id
+                               WHERE t.TaskId = @Id";
 
                 using (SqlCommand cmd = new SqlCommand(sql, conn))
                 {
@@ -420,18 +436,22 @@ namespace HospitalManagement.Controllers
                                 DueDate = Convert.ToDateTime(reader["DueDate"])
                             };
 
-                            if (reader["AssignedEmployeeId"] != DBNull.Value)
+                            if (reader["AssignedToId"] != DBNull.Value)
                             {
-                                task.AssignedEmployeeId = Convert.ToInt32(reader["AssignedEmployeeId"]);
-                                task.AssignedEmployee = new Employee
+                                task.AssignedEmployeeId = Convert.ToInt32(reader["AssignedToId"]);
+
+                                if (reader["EmployeeId"] != DBNull.Value)
                                 {
-                                    Id = Convert.ToInt32(reader["EmployeeId"]),
-                                    FirstName = reader["FirstName"].ToString(),
-                                    LastName = reader["LastName"].ToString(),
-                                    Email = reader["Email"].ToString(),
-                                    Role = reader["Role"].ToString(),
-                                    Department = reader["Department"]?.ToString()
-                                };
+                                    task.AssignedEmployee = new Employee
+                                    {
+                                        Id = Convert.ToInt32(reader["EmployeeId"]),
+                                        FirstName = reader["FirstName"].ToString(),
+                                        LastName = reader["LastName"].ToString(),
+                                        Email = reader["Email"].ToString(),
+                                        Role = reader["Role"].ToString(),
+                                        Department = reader["Department"]?.ToString()
+                                    };
+                                }
                             }
                         }
                     }
@@ -453,7 +473,7 @@ namespace HospitalManagement.Controllers
         {
             using (SqlConnection conn = new SqlConnection(_connectionString))
             {
-                string sql = "DELETE FROM Tasks WHERE Id = @Id";
+                string sql = "DELETE FROM Tasks WHERE TaskId = @Id";
 
                 using (SqlCommand cmd = new SqlCommand(sql, conn))
                 {

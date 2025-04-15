@@ -1,0 +1,96 @@
+﻿@model TaskItem
+
+<div class="container">
+    <h2>Edit Task</h2>
+
+    <form asp-action="Edit" method="post">
+        <input type="hidden" asp-for="Id" />
+
+        <div class="form-group">
+            <label asp-for="Title">Title</label>
+            <input asp-for="Title" class="form-control" required />
+            <span asp-validation-for="Title" class="text-danger"></span>
+        </div>
+
+        <div class="form-group">
+            <label asp-for="Description">Description</label>
+            <textarea asp-for="Description" class="form-control" rows="4"></textarea>
+        </div>
+
+        <div class="form-group">
+            <label asp-for="Priority">Priority</label>
+            <select asp-for="Priority" class="form-control">
+                <option value="Low">Low</option>
+                <option value="Medium">Medium</option>
+                <option value="High">High</option>
+                <option value="Critical">Critical</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label asp-for="Status">Status</label>
+            <select asp-for="Status" class="form-control">
+                <option value="Not Started">Not Started</option>
+                <option value="In Progress">In Progress</option>
+                <option value="Completed">Completed</option>
+                <option value="On Hold">On Hold</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label asp-for="DueDate">Due Date</label>
+            <input asp-for="DueDate" type="date" class="form-control" required />
+            <span asp-validation-for="DueDate" class="text-danger"></span>
+        </div>
+
+        <div class="form-group">
+            <label asp-for="AssignedEmployeeId">Assigned To</label>
+            <select asp-for="AssignedEmployeeId" class="form-control">
+                <option value="">Unassigned</option>
+                @foreach (var employee in ViewBag.Employees)
+                {
+                    <option value="@employee.Id">@employee.FirstName @employee.LastName - @employee.Department</option>
+                }
+            </select>
+        </div>
+
+        <div class="form-group">
+            <input type="submit" value="Save Changes" class="btn btn-primary" />
+            <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <script>
+        $(function() {
+            // Client-side validation
+            $('form').validate({
+                rules: {
+                    Title: {
+                        required: true,
+                        minlength: 3,
+                        maxlength: 100
+                    },
+                    DueDate: {
+                        required: true,
+                        date: true
+                    }
+                },
+                messages: {
+                    Title: {
+                        required: "Please enter a task title",
+                        minlength: "Title must be at least 3 characters long",
+                        maxlength: "Title cannot exceed 100 characters"
+                    },
+                    DueDate: {
+                        required: "Please select a due date",
+                        date: "Please enter a valid date"
+                    }
+                },
+                errorElement: 'span',
+                errorClass: 'text-danger'
+            });
+        });
+    </script>
+}
